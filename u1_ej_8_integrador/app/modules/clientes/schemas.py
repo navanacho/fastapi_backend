@@ -19,3 +19,8 @@ class ClienteRead(ClienteBase):
     id: int
     fecha_registro: datetime
     activo: bool = True
+
+class ClienteBase(BaseModel):
+    nombre: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr
+    telefono: str = Field(..., pattern=r"^\+?[0-9]{7,15}$")

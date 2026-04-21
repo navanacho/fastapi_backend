@@ -1,33 +1,19 @@
 from typing import List, Optional
 from datetime import datetime
-from . import schemas
+from . import schemas, models
+from sqlmodel import Session, select
 
-# Simulación de Base de Datos en memoria
-_db: dict[int, schemas.ClienteRead] = {}
-_next_id: int = 1
-
-def _buscar_por_email(email: str, excluir_id: Optional[int] = None) -> Optional[schemas.ClienteRead]:
-    for c in _db.values():
-        if c.email == email and c.id != excluir_id:
-            return c
-    return None
-
-def crear(data: schemas.ClienteCreate) -> schemas.ClienteRead:
-    global _next_id
-    if _buscar_por_email(data.email):
+def crear(db: Session, data: schemas.ClienteCreate) -> models.ClienteModel:
+    # Regla de negocio + validación
+    existing = db.exec(select(models.ClienteModel).where(models.ClienteModel.email == data.email)).first()
+    if existing:
         raise ValueError("El email ya está registrado en el sistema.")
     
-    cliente = schemas.ClienteRead(
-        id=_next_id,
-        nombre=data.nombre,
-        email=data.email,
-        telefono=data.telefono,
-        fecha_registro=datetime.utcnow(),
-        activo=True
-    )
-    _db[_next_id] = cliente
-    _next_id += 1
-    return cliente
+    cliente_db = models.ClienteModel(**data.model_dump())
+    db.add(cliente_db)
+    db.commit()
+    db.refresh(cliente_db)
+    return cliente_db
 
 def obtener_todas(
     skip: int = 0, 
