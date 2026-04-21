@@ -96,3 +96,59 @@ Content-Type: application/json
   "stock_minimo": 5,
   "activo": true
 }
+
+### ==========================================
+### CLIENTES (Nuevo módulo)
+### ==========================================
+
+# 6. Crear cliente
+POST {{base_url}}/clientes/
+Content-Type: application/json
+
+{
+  "nombre": "Ana García",
+  "email": "ana.garcia@empresa.com",
+  "telefono": "+5491155551234"
+}
+
+### 
+
+# 7. Listar con filtros avanzados
+GET {{base_url}}/clientes/?skip=0&limit=5&nombre=ana&activo=true
+
+### 
+
+# 8. Actualizar cliente
+PUT {{base_url}}/clientes/1
+Content-Type: application/json
+
+{
+  "nombre": "Ana García López",
+  "email": "ana.lopez@empresa.com"
+}
+
+### 
+
+# 9. Desactivar cliente
+PUT {{base_url}}/clientes/1/desactivar
+
+### ERROR: Email duplicado (Debe responder 409 Conflict)
+POST {{base_url}}/clientes/
+Content-Type: application/json
+
+{
+  "nombre": "Cliente Duplicado",
+  "email": "ana.garcia@empresa.com",
+  "telefono": "1199998888"
+}
+
+### ERROR: Modificar cliente desactivado (Debe responder 400 Bad Request)
+PUT {{base_url}}/clientes/1
+Content-Type: application/json
+
+{
+  "nombre": "Intento de modificación ilegal"
+}
+
+### ERROR: ID inexistente (Debe responder 404 Not Found)
+GET {{base_url}}/clientes/9999
